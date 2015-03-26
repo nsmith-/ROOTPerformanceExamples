@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-import time
+import time, sys
 import ROOT
-ROOT.gROOT.SetBatch(True)
+# ROOT.gROOT.SetBatch(True)
 
 DYJetsChain = ROOT.TChain("ee/final/Ntuple")
 DYJetsChain.Add("root://cmsxrootd.hep.wisc.edu//store/user/nsmith/ZHinvNtuples/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/make_ntuples_cfg-patTuple_cfg-00037C53-AAD1-E111-B1BE-003048D45F38.root")
@@ -15,6 +15,18 @@ DataChain.Add("root://cmsxrootd.hep.wisc.edu//store/user/nsmith/ZHinvNtuples/dat
 DataChain.Add("root://cmsxrootd.hep.wisc.edu//store/user/nsmith/ZHinvNtuples/data_DoubleElectron_Run2012A_22Jan2013_v1/make_ntuples_cfg-patTuple_cfg-02A18685-5567-E211-9D79-00248C0BE01E.root")
 DataChain.Add("root://cmsxrootd.hep.wisc.edu//store/user/nsmith/ZHinvNtuples/data_DoubleElectron_Run2012A_22Jan2013_v1/make_ntuples_cfg-patTuple_cfg-02CE0229-A467-E211-ABD1-00248C55CC40.root")
 DataChain.Add("root://cmsxrootd.hep.wisc.edu//store/user/nsmith/ZHinvNtuples/data_DoubleElectron_Run2012A_22Jan2013_v1/make_ntuples_cfg-patTuple_cfg-062A0C12-6167-E211-8114-002354EF3BE1.root")
+
+def optimizeBranchStatus() :
+    branches = ['e1Pt', 'e2Pt', 'e1CBID_MEDIUM', 'e2CBID_MEDIUM', 'doubleEPass', 'Mass', 'reducedMET']
+    DYJetsChain.SetBranchStatus('*', 0)
+    DataChain.SetBranchStatus('*', 0)
+    for b in branches :
+        DYJetsChain.SetBranchStatus(b, 1)
+        DataChain.SetBranchStatus(b, 1)
+
+def deoptimizeBranchStatus() :
+    DYJetsChain.SetBranchStatus('*', 1)
+    DataChain.SetBranchStatus('*', 1)
 
 def drawSeq() :
     c = ROOT.TCanvas()
@@ -38,13 +50,6 @@ def drawLoop() :
     hmassdata = ROOT.TH1F('hmassdata2', '', 100, 40, 250)
     hmet = ROOT.TH1F('hmet2', '', 100, 0, 500)
     hmetdata = ROOT.TH1F('hmetdata2', '', 100, 0, 500)
-
-    branches = ['e1Pt', 'e2Pt', 'e1CBID_MEDIUM', 'e2CBID_MEDIUM', 'doubleEPass', 'Mass', 'reducedMET']
-    DYJetsChain.SetBranchStatus('*', 0)
-    DataChain.SetBranchStatus('*', 0)
-    for b in branches :
-        DYJetsChain.SetBranchStatus(b, 1)
-        DataChain.SetBranchStatus(b, 1)
 
     for i in range(DYJetsChain.GetEntries()) :
         DYJetsChain.GetEntry(i)
@@ -81,6 +86,13 @@ def drawCLoop() :
     c.Print('test6.png')
 
 if __name__ == "__main__" :
+    if 'proof' in sys.argv :
+        proof = ROOT.TProof.Open("")
+        DYJetsChain.SetProof(True)
+        DataChain.SetProof(True)
+
+    optimizeBranchStatus()
+
     start = time.time()
     drawSeq()
     elapsed = time.time()-start

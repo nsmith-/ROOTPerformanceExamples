@@ -36,6 +36,8 @@ void cfilltest (TDirectory * dir, TChain * dychain, TChain * datachain) {
     }
   }
 
+  dychain->SetBranchStatus("*", 1);
+
   datachain->SetBranchAddress("e1Pt", &e1Pt);
   datachain->SetBranchAddress("e2Pt", &e2Pt);
   datachain->SetBranchAddress("e1CBID_MEDIUM", &e1CBID_MEDIUM);
@@ -59,4 +61,6 @@ void cfilltest (TDirectory * dir, TChain * dychain, TChain * datachain) {
       hmet->Fill(reducedMET);
     }
   }
+
+  datachain->SetBranchStatus("*", 1);
 }
